@@ -1,21 +1,16 @@
 "use server";
 import { redirect } from "next/navigation";
-import { NextResponse } from "next/server";
 import * as Realm from "realm-web";
 import { cookies } from "next/headers";
+import { setSessionCookie } from "../auth/auth";
 
-export async function handleLogin(currentUser: string, sessionData?: any) {
-  // const encryptedSessionData = encrypt(sessionData) // Encrypt your session data
-  const encryptedSessionData = sessionData;
-  cookies().set("currentUser", currentUser, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 7, // One week
-    path: "/",
-  });
-  // Redirect or handle the response after setting the cookie
-  redirect("/dashboard");
-}
+const emailPasswordCredentials = (email: string, password: string) => {
+  if (email.endsWith("@example.com") && password === "password") {
+    return {
+      email,
+    };
+  }
+};
 
 export async function authenticate(_currentState: unknown, formData: FormData) {
   const app = new Realm.App({
@@ -27,23 +22,31 @@ export async function authenticate(_currentState: unknown, formData: FormData) {
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
-  try {
-    console.log("signing in user");
-
-    const credentials = Realm.Credentials.emailPassword(email, password);
-    const session = await app.logIn(credentials);
-    // console.log("user", session);
-
-    const user = app.currentUser; // Assuming this holds user data
-    // Redirect to dashboard or handle successful login
-    // console.log("user", user);
-    if (user) {
-      handleLogin(user.id);
+  if (email && password) {
+    console.log("signing in user", email);
+    const user = emailPasswordCredentials(email, password);
+    if (!user) {
+      console.log("Invalid email or password");
+      return { isError: true, message: "Invalid email or password" };
     }
-    return user?.id;
-  } catch (error) {
-    console.error("error", error);
-    return "Invalid email or password or some other error";
+    await setSessionCookie(user);
+    redirect("/dashboard");
+
+    // ########################
+    // const credentials = Realm.Credentials.emailPassword(email, password);
+    // const session = await app.logIn(credentials);
+    // // console.log("user", session);
+
+    // const user = app.currentUser; // Assuming this holds user data
+    // // Redirect to dashboard or handle successful login
+    // // console.log("user", user);
+    // if (user) {
+    //   handleLogin(user.id);
+    // }
+    // return user?.id;
+  } else {
+    console.log("error");
+    return { isError: true, message: "oops, something went wrong" };
   }
 }
 

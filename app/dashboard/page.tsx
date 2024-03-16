@@ -1,6 +1,8 @@
 import React from "react";
 import { logout } from "../lib/actions";
 import * as Realm from "realm-web";
+import Link from "next/link";
+import NavBar from "@/components/navbar";
 
 export default function page() {
   const app = new Realm.App({
@@ -9,10 +11,7 @@ export default function page() {
 
   return (
     <div>
-      <div className="flex justify-between p-4">
-        <p>MongoDB Next Auth</p>
-        <button onClick={logout}>logout</button>
-      </div>
+      <NavBar />
       {/* logged in use id */}
       <p>User id: {app.currentUser?.id}</p>
     </div>

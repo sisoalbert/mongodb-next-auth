@@ -4,9 +4,8 @@ import { authenticate } from "@/app/lib/actions";
 import { useFormState, useFormStatus } from "react-dom";
 
 export default function Page() {
-  const [Message, dispatch] = useFormState(authenticate, undefined);
-
-  console.log(Message);
+  const [state, dispatch] = useFormState(authenticate, undefined);
+  console.log("state:", state);
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -34,6 +33,9 @@ export default function Page() {
         </div>
         <div>
           {/* {Message && <p className="text-red-500 text-xs italic">{Message}</p>} */}
+          {Boolean(state?.isError) && (
+            <p className="text-red-700">{state?.message}</p>
+          )}
         </div>
         <LoginButton />
       </form>
