@@ -1,7 +1,5 @@
 import React from "react";
-import { logout } from "../lib/actions";
 import * as Realm from "realm-web";
-import Link from "next/link";
 import NavBar from "@/components/navbar";
 
 export default function page() {

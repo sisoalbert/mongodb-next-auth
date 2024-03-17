@@ -1,6 +1,6 @@
 import { JWTPayload, SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-const JWT_COOKIE = "sessionToken";
+export const JWT_COOKIE = "sessionToken";
 
 export async function getUserFromSession() {
   const sessionTokenCookie = cookies().get(JWT_COOKIE);
@@ -21,8 +21,8 @@ export async function getUserFromSession() {
   }
 }
 
-export async function setSessionCookie(user: JWTPayload) {
-  const sessionToken = await new SignJWT(user)
+export async function setSessionCookie(user: string) {
+  const sessionToken = await new SignJWT({ user })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setIssuer(process.env.JWT_ISSUER as string)
@@ -36,4 +36,8 @@ export async function setSessionCookie(user: JWTPayload) {
     maxAge: 60 * 60 * 24 * 7, // One week
     path: "/",
   });
+}
+
+export async function removeSession() {
+  cookies().delete(JWT_COOKIE);
 }
